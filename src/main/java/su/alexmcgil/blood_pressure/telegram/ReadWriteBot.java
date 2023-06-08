@@ -2,6 +2,7 @@ package su.alexmcgil.blood_pressure.telegram;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
@@ -20,12 +21,16 @@ public class ReadWriteBot extends SpringWebhookBot {
     String botToken;
 
 
-    MessageHandler messageHandler;
-    CallbackQueryHandler callbackQueryHandler;
+    private final MessageHandler messageHandler;
+    private CallbackQueryHandler callbackQueryHandler;
 
     public ReadWriteBot(SetWebhook setWebhook, MessageHandler messageHandler, CallbackQueryHandler callbackQueryHandler) {
         super(setWebhook);
         this.messageHandler = messageHandler;
+    }
+
+    @Autowired
+    public void setCallbackQueryHandler(CallbackQueryHandler callbackQueryHandler) {
         this.callbackQueryHandler = callbackQueryHandler;
     }
 

@@ -10,7 +10,6 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import su.alexmcgil.blood_pressure.entity.Pressure;
 import su.alexmcgil.blood_pressure.entity.User;
 import su.alexmcgil.blood_pressure.repository.UserRepository;
-//import su.alexmcgil.blood_pressure.telegram.TelegramApiClient;
 import su.alexmcgil.blood_pressure.telegram.keyboard.ReplyKeyboardMaker;
 import su.alexmcgil.blood_pressure.utils.Buttons;
 
@@ -27,7 +26,6 @@ import java.util.concurrent.atomic.AtomicReference;
 @RequiredArgsConstructor
 public class MessageHandler {
 
-//    TelegramApiClient telegramApiClient;
     ReplyKeyboardMaker replyKeyboardMaker;
     private final UserRepository userRepository;
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd' 'HH:mm:ss");
@@ -39,10 +37,12 @@ public class MessageHandler {
 
         String inputText = message.getText();
 
+        checkUserExist(username, chatId);
+
         if (inputText == null) {
             throw new IllegalArgumentException();
         } else if (inputText.equals("/start") | inputText.equals(Buttons.RESTART.getButtonName())) {
-            return getStartMessage(chatId, username);
+            return getStartMessage(chatId);
         } else if (inputText.equals(Buttons.WRITE_DATA.getButtonName())) {
             return getWriteDataMessage(chatId);
         } else if (inputText.equals(Buttons.GET_RECORDS.getButtonName())) {
@@ -70,14 +70,10 @@ public class MessageHandler {
         }
     }
 
-    private SendMessage getStartMessage(String chatId, String username) {
+    private SendMessage getStartMessage(String chatId) {
         SendMessage sendMessage = new SendMessage(chatId, "Привет, это бот для сохранения и вывода записей давления.");
         sendMessage.enableMarkdown(true);
         sendMessage.setReplyMarkup(replyKeyboardMaker.getMainMenuKeyboard());
-        User user = new User();
-        user.setTelegramID(Long.parseLong(chatId));
-        user.setName(username);
-        userRepository.save(user);
         return sendMessage;
     }
 
@@ -171,6 +167,16 @@ public class MessageHandler {
         sendMessage.setReplyMarkup(replyKeyboardMaker.getMainMenuKeyboard());
 
         return sendMessage;
+    }
+
+    private void checkUserExist(String username, String chatId) {
+        Optional<User> optionalUser = userRepository.findById(chatId);
+        if (optionalUser.isEmpty()) {
+            User user = new User();
+            user.setTelegramID(Long.parseLong(chatId));
+            user.setName(username);
+            userRepository.save(user);
+        }
     }
 
 }
