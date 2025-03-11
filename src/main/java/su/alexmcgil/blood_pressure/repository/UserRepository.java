@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends CrudRepository<User, String> {
-    @Query("select u from User u inner join Pressure p where u.telegramID = ?1")
+    @Query("select u from User u inner join fetch u.userPressures p where u.telegramID = ?1")
     Optional<User> getRecords(Long telegramID);
 
 }
